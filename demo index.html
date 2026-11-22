@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portofolio - Sistem Absensi & Penggajian Bimbel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+
+<!-- Banner Demo -->
+<div class="bg-amber-100 text-amber-800 text-center py-2 px-4 text-sm font-semibold">
+  🚀 Versi Demo / Dummy. Data tidak akan tersimpan ke database asli (Aman untuk eksplorasi).
+</div>
+
+<div class="max-w-4xl mx-auto p-4 mt-2">
+  <!-- Navigasi Atas -->
+  <header class="bg-white rounded-xl shadow p-4 mb-6 flex flex-wrap justify-between items-center gap-2">
+    <h1 class="text-xl font-bold text-indigo-700">Portal Absensi Bimbel</h1>
+    <div class="flex gap-2">
+      <button onclick="showTab('tab-absen')" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-sm font-medium">Isi Absensi</button>
+      <button onclick="showTab('tab-karyawan')" class="px-3 py-1.5 rounded-lg bg-slate-200 text-slate-800 text-sm font-medium">Riwayat Karyawan</button>
+      <button onclick="showTab('tab-owner')" class="px-3 py-1.5 rounded-lg bg-slate-800 text-white text-sm font-medium">Login Owner</button>
+    </div>
+  </header>
+
+  <!-- 1. FORM ABSENSI KARYAWAN -->
+  <section id="tab-absen" class="bg-white rounded-xl shadow p-6 max-w-lg mx-auto">
+    <h2 class="text-lg font-bold mb-4">Form Absensi Mengajar</h2>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Nama Pengajar</label>
+        <select id="sel-emp" onchange="onSelectEmployee()" class="w-full border rounded-lg p-2.5 bg-white">
+          <option value="">-- Pilih Nama Anda --</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Kontak Terdaftar</label>
+        <input id="inp-contact" type="text" readonly class="w-full border rounded-lg p-2.5 bg-slate-100 text-slate-600" placeholder="Otomatis terisi" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Cabang Mengajar</label>
+        <select id="sel-branch" class="w-full border rounded-lg p-2.5 bg-white">
+          <option value="">-- Pilih Cabang --</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Status Absensi</label>
+        <select id="sel-action" class="w-full border rounded-lg p-2.5 bg-white">
+          <option value="in">Absen Masuk (Mulai Mengajar)</option>
+          <option value="out">Absen Pulang (Selesai Mengajar)</option>
+        </select>
+      </div>
+      <button id="btn-submit" onclick="kirimAbsensi()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition">
+        Kirim Absensi (Kunci GPS & Waktu Sekarang)
+      </button>
+      <p id="absen-msg" class="text-sm font-medium text-center mt-2"></p>
+    </div>
+  </section>
+
+  <!-- 2. RIWAYAT KARYAWAN (LOGIN PIN) -->
+  <section id="tab-karyawan" class="hidden bg-white rounded-xl shadow p-6 max-w-2xl mx-auto">
+    <h2 class="text-lg font-bold mb-4">Cek Riwayat Absensi Saya</h2>
+    <p class="text-xs text-slate-500 mb-4">*Demo: Ketik PIN sembarang (misal: 123456) untuk melihat contoh riwayat.</p>
+    <div class="flex gap-2 mb-4">
+      <input id="inp-pin" type="password" maxlength="6" placeholder="Masukkan 6 Digit PIN Rahasia" class="border rounded-lg p-2.5 flex-1" />
+      <button id="btn-riwayat" onclick="cekRiwayat()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium">Masuk</button>
+    </div>
+    <div id="riwayat-box" class="hidden">
+      <h3 id="riwayat-nama" class="font-bold text-indigo-700 mb-2">Riwayat Mengajar (Demo)</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="p-2 border text-left">Tanggal</th>
+              <th class="p-2 border text-left">Cabang</th>
+              <th class="p-2 border text-left">Jam Masuk</th>
+              <th class="p-2 border text-left">Jam Pulang</th>
+            </tr>
+          </thead>
+          <tbody id="riwayat-tbody">
+            <tr><td class="p-2 border">2026-11-20</td><td class="p-2 border">Cabang Utara</td><td class="p-2 border">15:00</td><td class="p-2 border">17:00</td></tr>
+            <tr><td class="p-2 border">2026-11-21</td><td class="p-2 border">Cabang Barat</td><td class="p-2 border">14:30</td><td class="p-2 border">16:30</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. PORTAL OWNER -->
+  <section id="tab-owner" class="hidden bg-white rounded-xl shadow p-6">
+    <div id="owner-login-form" class="max-w-sm mx-auto space-y-3">
+      <h2 class="text-lg font-bold">Login Dashboard Owner</h2>
+      <p class="text-xs text-slate-500 mb-2">*Demo: Ketik username dan password apa saja untuk masuk.</p>
+      <input id="owner-user" type="text" placeholder="Username Owner" class="w-full border rounded-lg p-2.5" value="admin" />
+      <input id="owner-pass" type="password" placeholder="Password Owner" class="w-full border rounded-lg p-2.5" value="admin123" />
+      <button id="btn-owner" onclick="loadPayroll()" class="w-full bg-slate-800 text-white py-2.5 rounded-lg font-medium">Masuk Dashboard</button>
+    </div>
+
+    <div id="owner-dashboard" class="hidden space-y-6">
+      <div class="flex flex-wrap gap-3 items-end justify-between border-b pb-4">
+        <div class="flex flex-wrap gap-3">
+          <div>
+            <label class="block text-xs font-medium">Dari Tanggal</label>
+            <input type="date" class="border rounded-lg p-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium">Sampai Tanggal</label>
+            <input type="date" class="border rounded-lg p-2 text-sm" />
+          </div>
+          <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium self-end">Filter Rekap</button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="p-2 border text-left">Nama</th>
+              <th class="p-2 border text-right">Total Jam</th>
+              <th class="p-2 border text-right">Honor Mengajar</th>
+              <th class="p-2 border text-right">Transport</th>
+              <th class="p-2 border text-right">Total Gaji</th>
+              <th class="p-2 border text-center">Kirim Rekap</th>
+            </tr>
+          </thead>
+          <tbody id="owner-tbody">
+            <!-- Data Dummy Owner -->
+            <tr>
+              <td class="p-2 border font-medium">Ms Ani <span class="text-xs text-slate-500 block">PIN: 123456</span></td>
+              <td class="p-2 border text-right">10 jam</td>
+              <td class="p-2 border text-right">Rp150.000</td>
+              <td class="p-2 border text-right">Rp30.000</td>
+              <td class="p-2 border text-right font-bold text-indigo-700">Rp180.000</td>
+              <td class="p-2 border text-center">
+                <button class="inline-block bg-green-600 text-white px-3 py-1 rounded text-xs font-medium">Kirim WA</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="p-2 border font-medium">Ms Citra <span class="text-xs text-slate-500 block">PIN: 654321</span></td>
+              <td class="p-2 border text-right">8 jam</td>
+              <td class="p-2 border text-right">Rp120.000</td>
+              <td class="p-2 border text-right">Rp0</td>
+              <td class="p-2 border text-right font-bold text-indigo-700">Rp120.000</td>
+              <td class="p-2 border text-center">
+                <button class="bg-pink-600 text-white px-3 py-1 rounded text-xs font-medium">Salin Teks (@demo_citra)</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// DATA DUMMY (Tidak memanggil database asli)
+// Seluruh nama, nomor telepon, dan username di bawah ini adalah fiktif.
+const DUMMY_INIT = {
+  employees: [
+    { id: 1, name: "Ms Ani Pratiwi", phone: "628120000001", ig_username: null },
+    { id: 2, name: "Ms Budi Santoso", phone: "628120000002", ig_username: null },
+    { id: 3, name: "Ms Citra Dewi", phone: null, ig_username: "demo_citra" }
+  ],
+  branches: [
+    { id: "utara", name: "Cabang Utara" },
+    { id: "barat", name: "Cabang Barat" },
+    { id: "timur", name: "Cabang Timur" }
+  ],
+  permissions: [
+    { employee_id: 1, branch_id: "utara" }, { employee_id: 1, branch_id: "barat" }, { employee_id: 1, branch_id: "timur" },
+    { employee_id: 2, branch_id: "utara" }, { employee_id: 2, branch_id: "barat" },
+    { employee_id: 3, branch_id: "utara" }, { employee_id: 3, branch_id: "barat" }, { employee_id: 3, branch_id: "timur" }
+  ]
+};
+
+function showTab(id) {
+  ["tab-absen", "tab-karyawan", "tab-owner"].forEach(t => document.getElementById(t).classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+}
+
+function loadInitData() {
+  const sel = document.getElementById("sel-emp");
+  DUMMY_INIT.employees.forEach(e => {
+    const opt = document.createElement("option");
+    opt.value = e.id;
+    opt.textContent = e.name;
+    sel.appendChild(opt);
+  });
+}
+
+function onSelectEmployee() {
+  const empId = parseInt(document.getElementById("sel-emp").value);
+  const emp = DUMMY_INIT.employees.find(e => e.id === empId);
+  document.getElementById("inp-contact").value = emp ? (emp.phone ? `+${emp.phone}` : `IG: @${emp.ig_username}`) : "";
+
+  const bSel = document.getElementById("sel-branch");
+  bSel.innerHTML = '<option value="">-- Pilih Cabang --</option>';
+  if (!emp) return;
+
+  const allowedIds = DUMMY_INIT.permissions.filter(p => p.employee_id === empId).map(p => p.branch_id);
+  DUMMY_INIT.branches.filter(b => allowedIds.includes(b.id)).forEach(b => {
+    const opt = document.createElement("option");
+    opt.value = b.id;
+    opt.textContent = b.name;
+    bSel.appendChild(opt);
+  });
+}
+
+// Simulasi Kirim Absensi tanpa Server
+function kirimAbsensi() {
+  const empId = document.getElementById("sel-emp").value;
+  const branchId = document.getElementById("sel-branch").value;
+  const msgEl = document.getElementById("absen-msg");
+  const btn = document.getElementById("btn-submit");
+
+  if (!empId || !branchId) {
+    msgEl.className = "text-sm font-medium text-red-600 text-center";
+    msgEl.textContent = "Pilih nama dan cabang terlebih dahulu.";
+    return;
+  }
+
+  btn.textContent = "Memvalidasi GPS & Server Time (Simulasi)...";
+  btn.classList.add("opacity-75", "cursor-not-allowed");
+  msgEl.textContent = "";
+
+  // Simulasi proses loading 1.5 detik
+  setTimeout(() => {
+    btn.textContent = "Kirim Absensi (Kunci GPS & Waktu Sekarang)";
+    btn.classList.remove("opacity-75", "cursor-not-allowed");
+
+    msgEl.className = "text-sm font-bold text-green-600 text-center";
+    msgEl.textContent = "✅ [DEMO] Absensi berhasil dicatat! Sinyal GPS dikunci.";
+  }, 1500);
+}
+
+// Simulasi Riwayat
+function cekRiwayat() {
+  const pin = document.getElementById("inp-pin").value;
+  if (!pin) return alert("Masukkan PIN!");
+
+  const btn = document.getElementById("btn-riwayat");
+  btn.textContent = "Loading...";
+
+  setTimeout(() => {
+    btn.textContent = "Masuk";
+    document.getElementById("riwayat-box").classList.remove("hidden");
+  }, 1000);
+}
+
+// Simulasi Owner
+function loadPayroll() {
+  const btn = document.getElementById("btn-owner");
+  btn.textContent = "Loading Data...";
+
+  setTimeout(() => {
+    btn.textContent = "Masuk Dashboard";
+    document.getElementById("owner-login-form").classList.add("hidden");
+    document.getElementById("owner-dashboard").classList.remove("hidden");
+  }, 1200);
+}
+
+// Muat data saat halaman dibuka
+loadInitData();
+</script>
+</body>
+</html>
